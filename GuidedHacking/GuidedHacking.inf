@@ -1,0 +1,87 @@
+;
+; GuidedHacking.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=GuidedHacking.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+PnpLockDown=1
+
+[DestinationDirs]
+DefaultDestDir = 12
+GuidedHacking_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+GuidedHacking.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%GuidedHacking.DeviceDesc%=GuidedHacking_Device, Root\GuidedHacking ; TODO: edit hw-id
+
+[GuidedHacking_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+GuidedHacking.sys
+
+;-------------- Service installation
+[GuidedHacking_Device.NT.Services]
+AddService = GuidedHacking,%SPSVCINST_ASSOCSERVICE%, GuidedHacking_Service_Inst
+
+; -------------- GuidedHacking driver install sections
+[GuidedHacking_Service_Inst]
+DisplayName    = %GuidedHacking.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\GuidedHacking.sys
+
+;
+;--- GuidedHacking_Device Coinstaller installation ------
+;
+
+[GuidedHacking_Device.NT.CoInstallers]
+AddReg=GuidedHacking_Device_CoInstaller_AddReg
+CopyFiles=GuidedHacking_Device_CoInstaller_CopyFiles
+
+[GuidedHacking_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[GuidedHacking_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[GuidedHacking_Device.NT.Wdf]
+KmdfService =  GuidedHacking, GuidedHacking_wdfsect
+[GuidedHacking_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "GuidedHacking Installation Disk"
+GuidedHacking.DeviceDesc = "GuidedHacking Device"
+GuidedHacking.SVCDESC = "GuidedHacking Service"
